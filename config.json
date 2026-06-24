@@ -1,0 +1,17 @@
+{
+  "student": "Sam",
+  "timetable": {
+    "monday":    ["Specialist Maths", "Physics", "English"],
+    "tuesday":   ["Chemistry", "English", "History"],
+    "wednesday": ["Specialist Maths", "Physics", "PE"],
+    "thursday":  ["Chemistry", "History", "English"],
+    "friday":    ["Specialist Maths", "Physics", "Chemistry"]
+  },
+  "termDates": {
+    "start": "2026-07-20",
+    "end": "2026-09-18"
+  },
+  "holidays": [
+    { "label": "Test holiday", "start": "2026-08-11", "end": "2026-08-11" }
+  ]
+}

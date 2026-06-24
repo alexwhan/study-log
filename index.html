@@ -16,6 +16,8 @@
       --accent-dim: #1a3d30;
       --warn: #f59e0b;
       --warn-dim: #2d2200;
+      --missed: #ef4444;
+      --missed-dim: #2d1010;
       --text: #e2e8f0;
       --text-muted: #64748b;
       --text-dim: #94a3b8;
@@ -33,7 +35,7 @@
       font-size: 16px;
       line-height: 1.5;
       min-height: 100vh;
-      padding-bottom: 40px;
+      padding-bottom: 60px;
     }
 
     /* ── Header ── */
@@ -41,8 +43,9 @@
       padding: 20px 20px 0;
       display: flex;
       align-items: baseline;
-      gap: 10px;
+      justify-content: space-between;
     }
+    .header-left { display: flex; align-items: baseline; gap: 10px; }
     .header-title {
       font-family: var(--mono);
       font-size: 13px;
@@ -56,11 +59,20 @@
       font-size: 12px;
       color: var(--text-muted);
     }
+    .setup-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .setup-btn:hover { color: var(--text-dim); }
 
     /* ── Streak strip ── */
-    .streak-section {
-      padding: 16px 20px 0;
-    }
+    .streak-section { padding: 16px 20px 0; }
     .streak-label {
       font-size: 11px;
       color: var(--text-muted);
@@ -71,7 +83,7 @@
     }
     .streak-strip {
       display: flex;
-      gap: 5px;
+      gap: 4px;
       flex-wrap: nowrap;
       overflow-x: auto;
       padding-bottom: 4px;
@@ -79,8 +91,8 @@
     }
     .streak-strip::-webkit-scrollbar { display: none; }
     .streak-day {
-      flex: 0 0 28px;
-      height: 28px;
+      flex: 0 0 26px;
+      height: 26px;
       border-radius: 4px;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -90,27 +102,35 @@
       font-family: var(--mono);
       font-size: 10px;
       color: var(--text-muted);
-      position: relative;
-      cursor: default;
     }
-    .streak-day.has-entry {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .streak-day.has-flag {
-      background: var(--warn-dim);
-      border-color: var(--warn);
-      color: var(--warn);
-    }
-    .streak-day.today {
-      border-width: 2px;
-    }
+    .streak-day.no-school { background: var(--bg); border-color: var(--bg); color: #2e3350; }
+    .streak-day.has-entry { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .streak-day.has-flag  { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); }
+    .streak-day.missed    { background: var(--missed-dim); border-color: var(--missed); color: var(--missed); }
+    .streak-day.today     { border-width: 2px; }
+    .streak-day.future    { opacity: 0.3; }
 
-    /* ── Main form area ── */
-    .main {
-      padding: 20px;
+    /* ── Non-school screens ── */
+    .screen-message {
+      margin: 40px 20px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-align: center;
     }
+    .screen-message .emoji { font-size: 36px; margin-bottom: 12px; }
+    .screen-message h2 {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+    }
+    .screen-message p { font-size: 14px; color: var(--text-dim); }
+
+    /* ── Main form ── */
+    .main { padding: 20px; }
 
     .section-heading {
       font-family: var(--mono);
@@ -121,13 +141,7 @@
       margin-bottom: 10px;
     }
 
-    /* Subject blocks */
-    .subjects-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
+    .subjects-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 
     .subject-block {
       background: var(--surface);
@@ -135,7 +149,6 @@
       border-radius: var(--radius);
       overflow: hidden;
     }
-
     .subject-header {
       display: flex;
       align-items: center;
@@ -143,7 +156,15 @@
       gap: 8px;
       border-bottom: 1px solid var(--border);
     }
-
+    .subject-name {
+      flex: 1;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
     .subject-name-input {
       flex: 1;
       background: transparent;
@@ -202,13 +223,13 @@
     }
     .flag-toggle input[type="checkbox"] {
       appearance: none;
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       border: 1.5px solid var(--border);
       border-radius: 3px;
       background: transparent;
       cursor: pointer;
       position: relative;
+      flex-shrink: 0;
     }
     .flag-toggle input[type="checkbox"]:checked {
       background: var(--warn-dim);
@@ -217,18 +238,12 @@
     .flag-toggle input[type="checkbox"]:checked::after {
       content: '✓';
       position: absolute;
-      top: -1px;
-      left: 2px;
+      top: -1px; left: 2px;
       font-size: 11px;
       color: var(--warn);
     }
-    .flag-label {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .flag-toggle input:checked ~ .flag-label {
-      color: var(--warn);
-    }
+    .flag-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+    .flag-toggle input:checked ~ .flag-label { color: var(--warn); }
     .flag-note {
       flex: 1;
       background: transparent;
@@ -238,11 +253,11 @@
       font-family: var(--sans);
       outline: none;
       display: none;
+      min-width: 0;
     }
     .flag-note::placeholder { color: #6b5a2a; }
     .flag-note.visible { display: block; }
 
-    /* Add subject button */
     .add-subject-btn {
       width: 100%;
       padding: 10px;
@@ -257,12 +272,8 @@
       transition: border-color 0.15s, color 0.15s;
       margin-bottom: 20px;
     }
-    .add-subject-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+    .add-subject-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* Submit */
     .submit-btn {
       width: 100%;
       padding: 14px;
@@ -280,7 +291,6 @@
     .submit-btn:active { transform: scale(0.98); }
     .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* Status message */
     .status {
       margin-top: 12px;
       padding: 10px 14px;
@@ -289,50 +299,44 @@
       font-family: var(--mono);
       display: none;
     }
-    .status.success {
-      display: block;
-      background: var(--accent-dim);
-      border: 1px solid var(--accent);
-      color: var(--accent);
-    }
-    .status.error {
-      display: block;
-      background: #2d1a1a;
-      border: 1px solid #ef4444;
-      color: #ef4444;
-    }
+    .status.success { display: block; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); }
+    .status.error   { display: block; background: #2d1a1a; border: 1px solid #ef4444; color: #ef4444; }
 
-    /* Config panel */
-    .config-toggle {
-      display: block;
-      text-align: center;
-      margin-top: 32px;
+    /* ── Setup panel ── */
+    .setup-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      overflow-y: auto;
+      padding: 24px 20px 60px;
+    }
+    .setup-panel.open { display: block; }
+    .setup-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .setup-panel-title {
       font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      cursor: pointer;
-      letter-spacing: 0.08em;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+    }
+    .close-setup {
       background: none;
       border: none;
-      width: 100%;
+      color: var(--text-muted);
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
     }
-    .config-toggle:hover { color: var(--text-dim); }
-
-    .config-panel {
-      display: none;
-      margin-top: 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-    }
-    .config-panel.open { display: block; }
-
-    .config-field {
-      margin-bottom: 14px;
-    }
-    .config-label {
+    .setup-field { margin-bottom: 18px; }
+    .setup-label {
       display: block;
       font-size: 11px;
       font-family: var(--mono);
@@ -341,37 +345,43 @@
       text-transform: uppercase;
       margin-bottom: 6px;
     }
-    .config-input {
+    .setup-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-family: var(--sans);
+    }
+    .setup-input {
       width: 100%;
-      background: var(--bg);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 5px;
       color: var(--text);
       font-family: var(--mono);
       font-size: 13px;
-      padding: 8px 10px;
+      padding: 10px 12px;
       outline: none;
     }
-    .config-input:focus { border-color: var(--accent); }
-
-    .config-save-btn {
-      padding: 8px 16px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      color: var(--text-dim);
+    .setup-input:focus { border-color: var(--accent); }
+    .setup-save-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #0a1a14;
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       cursor: pointer;
+      margin-top: 8px;
     }
-    .config-save-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* Past entries */
-    .past-section {
-      margin-top: 32px;
-    }
+    /* ── Past entries ── */
+    .past-section { margin-top: 32px; }
     .past-entry {
-      margin-top: 12px;
+      margin-top: 10px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -390,138 +400,325 @@
       font-family: var(--mono);
       line-height: 1.7;
     }
-    .past-entry-flag {
-      margin-top: 6px;
-      font-size: 12px;
-      color: var(--warn);
-      font-family: var(--mono);
-    }
 
-    /* Divider */
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 24px 0;
+    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 10px;
     }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      border: 1px solid;
+    }
+    .legend-dot.entry  { background: var(--accent-dim); border-color: var(--accent); }
+    .legend-dot.flag   { background: var(--warn-dim);   border-color: var(--warn); }
+    .legend-dot.missed { background: var(--missed-dim); border-color: var(--missed); }
+    .legend-dot.noschool { background: var(--bg); border-color: #2e3350; }
   </style>
 </head>
 <body>
 
 <div class="header">
-  <span class="header-title">Study Log</span>
-  <span class="header-date" id="headerDate"></span>
+  <div class="header-left">
+    <span class="header-title">Study Log</span>
+    <span class="header-date" id="headerDate"></span>
+  </div>
+  <button class="setup-btn" onclick="openSetup()">⚙ Setup</button>
 </div>
 
 <div class="streak-section">
-  <div class="streak-label">This month</div>
+  <div class="streak-label" id="streakLabel">Loading…</div>
   <div class="streak-strip" id="streakStrip"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot entry"></div> logged</div>
+    <div class="legend-item"><div class="legend-dot flag"></div> flagged</div>
+    <div class="legend-item"><div class="legend-dot missed"></div> missed</div>
+    <div class="legend-item"><div class="legend-dot noschool"></div> no school</div>
+  </div>
 </div>
 
-<div class="main">
-  <hr class="divider">
+<div id="appBody"></div>
 
-  <div class="section-heading">Today's classes</div>
-
-  <div class="subjects-list" id="subjectsList"></div>
-
-  <button class="add-subject-btn" onclick="addSubject()">+ Add subject</button>
-
-  <button class="submit-btn" id="submitBtn" onclick="submitLog()">Save to log</button>
-  <div class="status" id="status"></div>
-
-  <button class="config-toggle" onclick="toggleConfig()">⚙ Setup</button>
-  <div class="config-panel" id="configPanel">
-    <div class="config-field">
-      <label class="config-label">GitHub Token</label>
-      <input class="config-input" id="cfgToken" type="password" placeholder="ghp_..." />
-    </div>
-    <div class="config-field">
-      <label class="config-label">Repo (owner/name)</label>
-      <input class="config-input" id="cfgRepo" placeholder="alexwhan/study-log" />
-    </div>
-    <div class="config-field">
-      <label class="config-label">File path in repo</label>
-      <input class="config-input" id="cfgPath" placeholder="log.md" />
-    </div>
-    <button class="config-save-btn" onclick="saveConfig()">Save settings</button>
+<!-- Setup panel -->
+<div class="setup-panel" id="setupPanel">
+  <div class="setup-panel-header">
+    <span class="setup-panel-title">Setup</span>
+    <button class="close-setup" onclick="closeSetup()">×</button>
   </div>
-
-  <div class="past-section" id="pastSection"></div>
+  <div class="setup-field">
+    <label class="setup-label">GitHub Token</label>
+    <div class="setup-hint">Fine-grained token with Contents: read & write on this repo</div>
+    <input class="setup-input" id="cfgToken" type="password" placeholder="github_pat_..." />
+  </div>
+  <div class="setup-field">
+    <label class="setup-label">Repo</label>
+    <div class="setup-hint">owner/repo-name</div>
+    <input class="setup-input" id="cfgRepo" placeholder="alexwhan/study-log" />
+  </div>
+  <button class="setup-save-btn" onclick="saveSetup()">Save</button>
 </div>
 
 <script>
-// ── Config ──────────────────────────────────────────────
-const STORAGE_KEY = 'studylog_config';
+// ── Local storage ────────────────────────────────────────
+const SETUP_KEY   = 'studylog_setup';
 const ENTRIES_KEY = 'studylog_entries';
 
-function getConfig() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+function getSetup() {
+  try { return JSON.parse(localStorage.getItem(SETUP_KEY)) || {}; } catch { return {}; }
 }
-function saveConfig() {
-  const cfg = {
-    token: document.getElementById('cfgToken').value.trim(),
-    repo: document.getElementById('cfgRepo').value.trim(),
-    path: document.getElementById('cfgPath').value.trim() || 'log.md',
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-  showStatus('Settings saved.', 'success');
-}
-function toggleConfig() {
-  const panel = document.getElementById('configPanel');
-  panel.classList.toggle('open');
-  if (panel.classList.contains('open')) {
-    const cfg = getConfig();
-    document.getElementById('cfgToken').value = cfg.token || '';
-    document.getElementById('cfgRepo').value = cfg.repo || '';
-    document.getElementById('cfgPath').value = cfg.path || 'log.md';
-  }
-}
-
-// ── Local entry cache ────────────────────────────────────
 function getLocalEntries() {
   try { return JSON.parse(localStorage.getItem(ENTRIES_KEY)) || {}; } catch { return {}; }
 }
 function saveLocalEntry(dateStr, subjects) {
-  const entries = getLocalEntries();
-  entries[dateStr] = subjects;
-  localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+  const e = getLocalEntries();
+  e[dateStr] = subjects;
+  localStorage.setItem(ENTRIES_KEY, JSON.stringify(e));
 }
 
-// ── Date ────────────────────────────────────────────────
-function todayStr() {
-  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+// ── Date helpers ─────────────────────────────────────────
+function todayStr() { return localDateStr(new Date()); }
+function localDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-function formatDisplayDate(d) {
+function dayName(d) {
+  return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][d.getDay()];
+}
+function displayDate(d) {
   return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+function parseLocalDate(str) {
+  const [y,m,d] = str.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+// ── GitHub API ───────────────────────────────────────────
+async function ghFetch(path, setup) {
+  const res = await fetch(`https://api.github.com/repos/${setup.repo}/contents/${path}`, {
+    headers: { Authorization: `Bearer ${setup.token}`, Accept: 'application/vnd.github+json' }
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GitHub ${res.status}`);
+  return res.json();
+}
+
+async function getFileInfo(path, setup) {
+  const data = await ghFetch(path, setup);
+  if (!data) return { content: '', sha: null };
+  return { content: atob(data.content.replace(/\n/g,'')), sha: data.sha };
+}
+
+async function putFile(path, content, sha, setup, message) {
+  const body = { message, content: btoa(unescape(encodeURIComponent(content))) };
+  if (sha) body.sha = sha;
+  const res = await fetch(`https://api.github.com/repos/${setup.repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${setup.token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.message || `GitHub ${res.status}`); }
+}
+
+// ── Config from GitHub ───────────────────────────────────
+let CONFIG = null;
+
+async function loadConfig(setup) {
+  try {
+    const data = await ghFetch('config.json', setup);
+    if (!data) return null;
+    return JSON.parse(atob(data.content.replace(/\n/g,'')));
+  } catch { return null; }
+}
+
+// ── Parse log.md for logged dates ───────────────────────
+function parseLoggedDates(content) {
+  const logged = {};
+  const lines = content.split('\n');
+  for (const line of lines) {
+    const m = line.match(/^## (.+)$/);
+    if (m) {
+      // Try to find a date in YYYY-MM-DD somewhere, or parse the display date
+      const isoMatch = line.match(/(\d{4}-\d{2}-\d{2})/);
+      if (isoMatch) { logged[isoMatch[1]] = true; continue; }
+      // Try parsing display date like "Monday 20 July 2026"
+      try {
+        const d = new Date(m[1]);
+        if (!isNaN(d)) logged[localDateStr(d)] = true;
+      } catch {}
+    }
+  }
+  return logged;
+}
+
+// ── School day logic ─────────────────────────────────────
+function isWeekend(d) { const day = d.getDay(); return day === 0 || day === 6; }
+
+function isHoliday(dateStr, cfg) {
+  if (!cfg || !cfg.holidays) return false;
+  return cfg.holidays.some(h => dateStr >= h.start && dateStr <= h.end);
+}
+
+function isInTerm(dateStr, cfg) {
+  if (!cfg || !cfg.termDates) return true; // no config = assume in term
+  return dateStr >= cfg.termDates.start && dateStr <= cfg.termDates.end;
+}
+
+function isSchoolDay(dateStr, cfg) {
+  const d = parseLocalDate(dateStr);
+  if (isWeekend(d)) return false;
+  if (!isInTerm(dateStr, cfg)) return false;
+  if (isHoliday(dateStr, cfg)) return false;
+  return true;
+}
+
+function getSubjectsForDay(dateStr, cfg) {
+  if (!cfg || !cfg.timetable) return null;
+  const d = parseLocalDate(dateStr);
+  const name = dayName(d);
+  return cfg.timetable[name] || null;
 }
 
 // ── Streak strip ─────────────────────────────────────────
-function buildStreak() {
+function buildStreak(cfg, loggedDates) {
   const strip = document.getElementById('streakStrip');
+  const label = document.getElementById('streakLabel');
   strip.innerHTML = '';
-  const entries = getLocalEntries();
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const todayDate = today.getDate();
 
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const entry = entries[dateStr];
-    const isToday = d === todayDate;
-    const hasFlag = entry && entry.some(s => s.flagged);
-    const hasEntry = !!entry;
+  const today = new Date();
+  const todayS = todayStr();
+
+  // Show term days if we have term dates, else show current month
+  let days = [];
+  if (cfg && cfg.termDates) {
+    label.textContent = 'This term';
+    const start = parseLocalDate(cfg.termDates.start);
+    const end   = parseLocalDate(cfg.termDates.end);
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+      days.push(localDateStr(new Date(d)));
+    }
+  } else {
+    const y = today.getFullYear(), m = today.getMonth();
+    const daysInMonth = new Date(y, m+1, 0).getDate();
+    label.textContent = 'This month';
+    for (let d = 1; d <= daysInMonth; d++) {
+      days.push(`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+    }
+  }
+
+  const localEntries = getLocalEntries();
+
+  days.forEach(dateStr => {
+    const d = parseLocalDate(dateStr);
+    const dayNum = d.getDate();
+    const isToday = dateStr === todayS;
+    const isFuture = dateStr > todayS;
+    const schoolDay = isSchoolDay(dateStr, cfg);
 
     const el = document.createElement('div');
-    el.className = 'streak-day' + (hasFlag ? ' has-flag' : hasEntry ? ' has-entry' : '') + (isToday ? ' today' : '');
-    el.textContent = d;
-    el.title = dateStr + (hasEntry ? ' ✓' : '');
-    strip.appendChild(el);
+    el.title = dateStr;
 
-    // scroll today into view
-    if (isToday) setTimeout(() => el.scrollIntoView({ inline: 'center', behavior: 'smooth' }), 100);
+    if (!schoolDay) {
+      el.className = 'streak-day no-school' + (isToday ? ' today' : '');
+      el.textContent = dayNum;
+    } else if (isFuture) {
+      el.className = 'streak-day future' + (isToday ? ' today' : '');
+      el.textContent = dayNum;
+    } else {
+      const logged = loggedDates[dateStr] || localEntries[dateStr];
+      const flagged = localEntries[dateStr] && localEntries[dateStr].some(s => s.flagged);
+      if (flagged) {
+        el.className = 'streak-day has-flag' + (isToday ? ' today' : '');
+      } else if (logged) {
+        el.className = 'streak-day has-entry' + (isToday ? ' today' : '');
+      } else {
+        el.className = 'streak-day missed' + (isToday ? ' today' : '');
+      }
+      el.textContent = dayNum;
+    }
+
+    strip.appendChild(el);
+    if (isToday) setTimeout(() => el.scrollIntoView({ inline: 'center', behavior: 'smooth' }), 200);
+  });
+}
+
+// ── Render app body ──────────────────────────────────────
+function renderApp(cfg) {
+  const body = document.getElementById('appBody');
+  const today = new Date();
+  const todayS = todayStr();
+
+  // Weekend
+  if (isWeekend(today)) {
+    body.innerHTML = `
+      <div class="screen-message">
+        <div class="emoji">🏖️</div>
+        <h2>Weekend</h2>
+        <p>No school today. Enjoy the break${cfg && cfg.student ? ', ' + cfg.student : ''}.</p>
+      </div>`;
+    return;
   }
+
+  // Outside term
+  if (cfg && !isInTerm(todayS, cfg)) {
+    body.innerHTML = `
+      <div class="screen-message">
+        <div class="emoji">📅</div>
+        <h2>School holidays</h2>
+        <p>Term starts ${cfg.termDates.start}.</p>
+      </div>`;
+    return;
+  }
+
+  // Holiday
+  if (cfg && isHoliday(todayS, cfg)) {
+    const hol = cfg.holidays.find(h => todayS >= h.start && todayS <= h.end);
+    body.innerHTML = `
+      <div class="screen-message">
+        <div class="emoji">🎉</div>
+        <h2>${hol ? hol.label : 'Public holiday'}</h2>
+        <p>No school today.</p>
+      </div>`;
+    return;
+  }
+
+  // Normal school day
+  const subjects = getSubjectsForDay(todayS, cfg);
+  const greeting = cfg && cfg.student ? `${cfg.student}'s log` : "Today's classes";
+
+  body.innerHTML = `
+    <div class="main">
+      <hr class="divider">
+      <div class="section-heading">${greeting} — ${displayDate(today)}</div>
+      <div class="subjects-list" id="subjectsList"></div>
+      <button class="add-subject-btn" onclick="addSubject()">+ Add subject</button>
+      <button class="submit-btn" id="submitBtn" onclick="submitLog()">Save to log</button>
+      <div class="status" id="status"></div>
+      <div class="past-section" id="pastSection"></div>
+    </div>`;
+
+  if (subjects && subjects.length) {
+    subjects.forEach(name => addSubject(name));
+  } else {
+    addSubject();
+  }
+
+  renderPastEntries();
 }
 
 // ── Subject blocks ───────────────────────────────────────
@@ -531,23 +728,26 @@ function addSubject(name = '', notes = '', flagged = false, flagNote = '') {
   subjectCount++;
   const id = subjectCount;
   const list = document.getElementById('subjectsList');
+  if (!list) return;
   const block = document.createElement('div');
   block.className = 'subject-block';
   block.id = `subject-${id}`;
+  const nameHTML = name
+    ? `<span class="subject-name">${name}</span>`
+    : `<input class="subject-name-input" placeholder="SUBJECT" value="" />`;
   block.innerHTML = `
     <div class="subject-header">
-      <input class="subject-name-input" placeholder="SUBJECT" value="${name}" />
+      ${nameHTML}
       <button class="remove-subject" onclick="removeSubject(${id})">×</button>
     </div>
     <textarea class="subject-notes" placeholder="- Topic covered&#10;- Another topic&#10;- ..." rows="4">${notes}</textarea>
     <div class="flag-row">
       <label class="flag-toggle">
         <input type="checkbox" id="flag-${id}" ${flagged ? 'checked' : ''} onchange="toggleFlagNote(${id})" />
-        <span class="flag-label">❓ Something didn't click</span>
+        <span class="flag-label">❓ Didn't click</span>
       </label>
       <input class="flag-note ${flagged ? 'visible' : ''}" id="flagnote-${id}" placeholder="What specifically?" value="${flagNote}" />
-    </div>
-  `;
+    </div>`;
   list.appendChild(block);
 }
 
@@ -555,76 +755,37 @@ function removeSubject(id) {
   const el = document.getElementById(`subject-${id}`);
   if (el) el.remove();
 }
-
 function toggleFlagNote(id) {
   const cb = document.getElementById(`flag-${id}`);
   const note = document.getElementById(`flagnote-${id}`);
   note.classList.toggle('visible', cb.checked);
   if (cb.checked) note.focus();
 }
-
 function getSubjects() {
   const blocks = document.querySelectorAll('.subject-block');
-  const subjects = [];
-  blocks.forEach(block => {
-    const name = block.querySelector('.subject-name-input').value.trim();
+  return Array.from(blocks).map(block => {
+    const nameEl = block.querySelector('.subject-name');
+    const nameInput = block.querySelector('.subject-name-input');
+    const name = nameEl ? nameEl.textContent.trim() : (nameInput ? nameInput.value.trim() : '');
     const notes = block.querySelector('.subject-notes').value.trim();
     const flagged = block.querySelector('input[type="checkbox"]').checked;
     const flagNote = block.querySelector('.flag-note').value.trim();
-    if (name || notes) subjects.push({ name, notes, flagged, flagNote });
-  });
-  return subjects;
+    return { name, notes, flagged, flagNote };
+  }).filter(s => s.name || s.notes);
 }
 
-// ── GitHub API ───────────────────────────────────────────
-async function getFileInfo(cfg) {
-  const res = await fetch(`https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`, {
-    headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json' }
-  });
-  if (res.status === 404) return { content: '', sha: null };
-  if (!res.ok) throw new Error(`GitHub error: ${res.status}`);
-  const data = await res.json();
-  const content = atob(data.content.replace(/\n/g, ''));
-  return { content, sha: data.sha };
-}
-
-async function putFile(cfg, content, sha) {
-  const body = {
-    message: `Log entry ${todayStr()}`,
-    content: btoa(unescape(encodeURIComponent(content))),
-  };
-  if (sha) body.sha = sha;
-  const res = await fetch(`https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${cfg.token}`,
-      Accept: 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || `GitHub error: ${res.status}`);
-  }
-}
-
-// ── Format markdown entry ────────────────────────────────
+// ── Format markdown ──────────────────────────────────────
 function formatEntry(subjects, dateStr) {
-  const displayDate = formatDisplayDate(new Date(dateStr + 'T12:00:00'));
-  let md = `## ${displayDate}\n\n`;
+  const d = parseLocalDate(dateStr);
+  let md = `## ${displayDate(d)} (${dateStr})\n\n`;
   subjects.forEach(s => {
-    const name = s.name || 'Unknown subject';
-    md += `**${name.toUpperCase()}**\n`;
+    md += `**${(s.name || 'Unknown').toUpperCase()}**\n`;
     if (s.notes) {
-      const lines = s.notes.split('\n').map(l => l.trim()).filter(Boolean);
-      lines.forEach(l => {
+      s.notes.split('\n').map(l => l.trim()).filter(Boolean).forEach(l => {
         md += l.startsWith('-') ? `${l}\n` : `- ${l}\n`;
       });
     }
-    if (s.flagged) {
-      md += `- ❓ ${s.flagNote || 'Needs review'}\n`;
-    }
+    if (s.flagged) md += `- ❓ ${s.flagNote || 'Needs review'}\n`;
     md += '\n';
   });
   md += '---\n\n';
@@ -634,76 +795,99 @@ function formatEntry(subjects, dateStr) {
 // ── Submit ───────────────────────────────────────────────
 async function submitLog() {
   const subjects = getSubjects();
-  if (!subjects.length) { showStatus('Add at least one subject.', 'error'); return; }
-
-  const cfg = getConfig();
-  if (!cfg.token || !cfg.repo) {
-    showStatus('Open ⚙ Setup and add your GitHub token and repo.', 'error');
-    return;
-  }
+  if (!subjects.length) { showStatus('Add at least one subject first.', 'error'); return; }
+  const setup = getSetup();
+  if (!setup.token || !setup.repo) { showStatus('Open ⚙ Setup and add your GitHub token and repo.', 'error'); return; }
 
   const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = 'Saving…';
 
   const dateStr = todayStr();
-
   try {
-    const { content, sha } = await getFileInfo(cfg);
-    const newEntry = formatEntry(subjects, dateStr);
-
-    // Prepend new entry so newest is at top
-    const updated = newEntry + content;
-    await putFile(cfg, updated, sha);
-
+    const { content, sha } = await getFileInfo('log.md', setup);
+    const updated = formatEntry(subjects, dateStr) + content;
+    await putFile('log.md', updated, sha, setup, `Log entry ${dateStr}`);
     saveLocalEntry(dateStr, subjects);
-    buildStreak();
+    buildStreak(CONFIG, {});
     showStatus('✓ Saved to GitHub.', 'success');
     renderPastEntries();
   } catch (err) {
     showStatus(`Error: ${err.message}`, 'error');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Save to log';
+    btn.disabled = false; btn.textContent = 'Save to log';
   }
 }
 
-// ── Status ───────────────────────────────────────────────
 function showStatus(msg, type) {
   const el = document.getElementById('status');
+  if (!el) return;
   el.className = `status ${type}`;
   el.textContent = msg;
   if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
-// ── Past entries (local) ─────────────────────────────────
+// ── Past entries ─────────────────────────────────────────
 function renderPastEntries() {
-  const entries = getLocalEntries();
   const past = document.getElementById('pastSection');
-  const keys = Object.keys(entries).sort().reverse().slice(0, 7);
+  if (!past) return;
+  const entries = getLocalEntries();
+  const keys = Object.keys(entries).sort().reverse().slice(0, 5);
   if (!keys.length) { past.innerHTML = ''; return; }
-
-  let html = `<hr class="divider"><div class="section-heading">Recent entries</div>`;
+  let html = `<hr class="divider"><div class="section-heading">Recent entries (this device)</div>`;
   keys.forEach(dateStr => {
     const subjects = entries[dateStr];
-    const display = formatDisplayDate(new Date(dateStr + 'T12:00:00'));
+    const d = parseLocalDate(dateStr);
     const hasFlag = subjects.some(s => s.flagged);
     html += `<div class="past-entry">
-      <div class="past-entry-date">${display}${hasFlag ? ' ❓' : ''}</div>
+      <div class="past-entry-date">${displayDate(d)}${hasFlag ? ' ❓' : ''}</div>
       <div class="past-entry-content">${subjects.map(s =>
-        `${s.name.toUpperCase()}\n${s.notes}${s.flagged ? '\n❓ ' + (s.flagNote || 'Needs review') : ''}`
+        `${s.name.toUpperCase()}${s.notes ? '\n' + s.notes : ''}${s.flagged ? '\n❓ ' + (s.flagNote || 'Needs review') : ''}`
       ).join('\n\n')}</div>
     </div>`;
   });
   past.innerHTML = html;
 }
 
+// ── Setup panel ──────────────────────────────────────────
+function openSetup() {
+  const s = getSetup();
+  document.getElementById('cfgToken').value = s.token || '';
+  document.getElementById('cfgRepo').value  = s.repo  || '';
+  document.getElementById('setupPanel').classList.add('open');
+}
+function closeSetup() {
+  document.getElementById('setupPanel').classList.remove('open');
+}
+function saveSetup() {
+  const setup = {
+    token: document.getElementById('cfgToken').value.trim(),
+    repo:  document.getElementById('cfgRepo').value.trim(),
+  };
+  localStorage.setItem(SETUP_KEY, JSON.stringify(setup));
+  closeSetup();
+  init();
+}
+
 // ── Init ─────────────────────────────────────────────────
-function init() {
-  document.getElementById('headerDate').textContent = formatDisplayDate(new Date());
-  buildStreak();
-  addSubject(); // start with one empty block
-  renderPastEntries();
+async function init() {
+  document.getElementById('headerDate').textContent = displayDate(new Date());
+
+  const setup = getSetup();
+
+  // Load config and log from GitHub if we have credentials
+  let loggedDates = {};
+  if (setup.token && setup.repo) {
+    try {
+      CONFIG = await loadConfig(setup);
+      const { content } = await getFileInfo('log.md', setup);
+      loggedDates = parseLoggedDates(content);
+    } catch (e) {
+      console.warn('GitHub load error:', e);
+    }
+  }
+
+  buildStreak(CONFIG, loggedDates);
+  renderApp(CONFIG);
 }
 
 init();

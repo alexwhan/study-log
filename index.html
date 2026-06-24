@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Study Log</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6ee7b7;
+      --accent-dim: #1a3d30;
+      --warn: #f59e0b;
+      --warn-dim: #2d2200;
+      --text: #e2e8f0;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 20px 20px 0;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .header-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .header-date {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Streak strip ── */
+    .streak-section {
+      padding: 16px 20px 0;
+    }
+    .streak-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--mono);
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .streak-strip {
+      display: flex;
+      gap: 5px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+    .streak-strip::-webkit-scrollbar { display: none; }
+    .streak-day {
+      flex: 0 0 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      position: relative;
+      cursor: default;
+    }
+    .streak-day.has-entry {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .streak-day.has-flag {
+      background: var(--warn-dim);
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+    .streak-day.today {
+      border-width: 2px;
+    }
+
+    /* ── Main form area ── */
+    .main {
+      padding: 20px;
+    }
+
+    .section-heading {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* Subject blocks */
+    .subjects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .subject-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .subject-header {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .subject-name-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      outline: none;
+    }
+    .subject-name-input::placeholder { color: var(--text-muted); }
+
+    .remove-subject {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .remove-subject:hover { color: #ef4444; }
+
+    .subject-notes {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.6;
+      padding: 10px 12px;
+      resize: none;
+      outline: none;
+      min-height: 80px;
+    }
+    .subject-notes::placeholder { color: var(--text-muted); }
+
+    .flag-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .flag-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .flag-toggle input[type="checkbox"] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 3px;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+    }
+    .flag-toggle input[type="checkbox"]:checked {
+      background: var(--warn-dim);
+      border-color: var(--warn);
+    }
+    .flag-toggle input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: -1px;
+      left: 2px;
+      font-size: 11px;
+      color: var(--warn);
+    }
+    .flag-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .flag-toggle input:checked ~ .flag-label {
+      color: var(--warn);
+    }
+    .flag-note {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--warn);
+      font-size: 13px;
+      font-family: var(--sans);
+      outline: none;
+      display: none;
+    }
+    .flag-note::placeholder { color: #6b5a2a; }
+    .flag-note.visible { display: block; }
+
+    /* Add subject button */
+    .add-subject-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      margin-bottom: 20px;
+    }
+    .add-subject-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #0a1a14;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Status message */
+    .status {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-family: var(--mono);
+      display: none;
+    }
+    .status.success {
+      display: block;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+    .status.error {
+      display: block;
+      background: #2d1a1a;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+
+    /* Config panel */
+    .config-toggle {
+      display: block;
+      text-align: center;
+      margin-top: 32px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: none;
+      border: none;
+      width: 100%;
+    }
+    .config-toggle:hover { color: var(--text-dim); }
+
+    .config-panel {
+      display: none;
+      margin-top: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .config-panel.open { display: block; }
+
+    .config-field {
+      margin-bottom: 14px;
+    }
+    .config-label {
+      display: block;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .config-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+    }
+    .config-input:focus { border-color: var(--accent); }
+
+    .config-save-btn {
+      padding: 8px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .config-save-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Past entries */
+    .past-section {
+      margin-top: 32px;
+    }
+    .past-entry {
+      margin-top: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+    }
+    .past-entry-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .past-entry-content {
+      font-size: 13px;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+      font-family: var(--mono);
+      line-height: 1.7;
+    }
+    .past-entry-flag {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--warn);
+      font-family: var(--mono);
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-title">Study Log</span>
+  <span class="header-date" id="headerDate"></span>
+</div>
+
+<div class="streak-section">
+  <div class="streak-label">This month</div>
+  <div class="streak-strip" id="streakStrip"></div>
+</div>
+
+<div class="main">
+  <hr class="divider">
+
+  <div class="section-heading">Today's classes</div>
+
+  <div class="subjects-list" id="subjectsList"></div>
+
+  <button class="add-subject-btn" onclick="addSubject()">+ Add subject</button>
+
+  <button class="submit-btn" id="submitBtn" onclick="submitLog()">Save to log</button>
+  <div class="status" id="status"></div>
+
+  <button class="config-toggle" onclick="toggleConfig()">⚙ Setup</button>
+  <div class="config-panel" id="configPanel">
+    <div class="config-field">
+      <label class="config-label">GitHub Token</label>
+      <input class="config-input" id="cfgToken" type="password" placeholder="ghp_..." />
+    </div>
+    <div class="config-field">
+      <label class="config-label">Repo (owner/name)</label>
+      <input class="config-input" id="cfgRepo" placeholder="alexwhan/study-log" />
+    </div>
+    <div class="config-field">
+      <label class="config-label">File path in repo</label>
+      <input class="config-input" id="cfgPath" placeholder="log.md" />
+    </div>
+    <button class="config-save-btn" onclick="saveConfig()">Save settings</button>
+  </div>
+
+  <div class="past-section" id="pastSection"></div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────
+const STORAGE_KEY = 'studylog_config';
+const ENTRIES_KEY = 'studylog_entries';
+
+function getConfig() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+}
+function saveConfig() {
+  const cfg = {
+    token: document.getElementById('cfgToken').value.trim(),
+    repo: document.getElementById('cfgRepo').value.trim(),
+    path: document.getElementById('cfgPath').value.trim() || 'log.md',
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+  showStatus('Settings saved.', 'success');
+}
+function toggleConfig() {
+  const panel = document.getElementById('configPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    const cfg = getConfig();
+    document.getElementById('cfgToken').value = cfg.token || '';
+    document.getElementById('cfgRepo').value = cfg.repo || '';
+    document.getElementById('cfgPath').value = cfg.path || 'log.md';
+  }
+}
+
+// ── Local entry cache ────────────────────────────────────
+function getLocalEntries() {
+  try { return JSON.parse(localStorage.getItem(ENTRIES_KEY)) || {}; } catch { return {}; }
+}
+function saveLocalEntry(dateStr, subjects) {
+  const entries = getLocalEntries();
+  entries[dateStr] = subjects;
+  localStorage.setItem(ENTRIES_KEY, JSON.stringify(entries));
+}
+
+// ── Date ────────────────────────────────────────────────
+function todayStr() {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+}
+function formatDisplayDate(d) {
+  return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+// ── Streak strip ─────────────────────────────────────────
+function buildStreak() {
+  const strip = document.getElementById('streakStrip');
+  strip.innerHTML = '';
+  const entries = getLocalEntries();
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayDate = today.getDate();
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const entry = entries[dateStr];
+    const isToday = d === todayDate;
+    const hasFlag = entry && entry.some(s => s.flagged);
+    const hasEntry = !!entry;
+
+    const el = document.createElement('div');
+    el.className = 'streak-day' + (hasFlag ? ' has-flag' : hasEntry ? ' has-entry' : '') + (isToday ? ' today' : '');
+    el.textContent = d;
+    el.title = dateStr + (hasEntry ? ' ✓' : '');
+    strip.appendChild(el);
+
+    // scroll today into view
+    if (isToday) setTimeout(() => el.scrollIntoView({ inline: 'center', behavior: 'smooth' }), 100);
+  }
+}
+
+// ── Subject blocks ───────────────────────────────────────
+let subjectCount = 0;
+
+function addSubject(name = '', notes = '', flagged = false, flagNote = '') {
+  subjectCount++;
+  const id = subjectCount;
+  const list = document.getElementById('subjectsList');
+  const block = document.createElement('div');
+  block.className = 'subject-block';
+  block.id = `subject-${id}`;
+  block.innerHTML = `
+    <div class="subject-header">
+      <input class="subject-name-input" placeholder="SUBJECT" value="${name}" />
+      <button class="remove-subject" onclick="removeSubject(${id})">×</button>
+    </div>
+    <textarea class="subject-notes" placeholder="- Topic covered&#10;- Another topic&#10;- ..." rows="4">${notes}</textarea>
+    <div class="flag-row">
+      <label class="flag-toggle">
+        <input type="checkbox" id="flag-${id}" ${flagged ? 'checked' : ''} onchange="toggleFlagNote(${id})" />
+        <span class="flag-label">❓ Something didn't click</span>
+      </label>
+      <input class="flag-note ${flagged ? 'visible' : ''}" id="flagnote-${id}" placeholder="What specifically?" value="${flagNote}" />
+    </div>
+  `;
+  list.appendChild(block);
+}
+
+function removeSubject(id) {
+  const el = document.getElementById(`subject-${id}`);
+  if (el) el.remove();
+}
+
+function toggleFlagNote(id) {
+  const cb = document.getElementById(`flag-${id}`);
+  const note = document.getElementById(`flagnote-${id}`);
+  note.classList.toggle('visible', cb.checked);
+  if (cb.checked) note.focus();
+}
+
+function getSubjects() {
+  const blocks = document.querySelectorAll('.subject-block');
+  const subjects = [];
+  blocks.forEach(block => {
+    const name = block.querySelector('.subject-name-input').value.trim();
+    const notes = block.querySelector('.subject-notes').value.trim();
+    const flagged = block.querySelector('input[type="checkbox"]').checked;
+    const flagNote = block.querySelector('.flag-note').value.trim();
+    if (name || notes) subjects.push({ name, notes, flagged, flagNote });
+  });
+  return subjects;
+}
+
+// ── GitHub API ───────────────────────────────────────────
+async function getFileInfo(cfg) {
+  const res = await fetch(`https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`, {
+    headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json' }
+  });
+  if (res.status === 404) return { content: '', sha: null };
+  if (!res.ok) throw new Error(`GitHub error: ${res.status}`);
+  const data = await res.json();
+  const content = atob(data.content.replace(/\n/g, ''));
+  return { content, sha: data.sha };
+}
+
+async function putFile(cfg, content, sha) {
+  const body = {
+    message: `Log entry ${todayStr()}`,
+    content: btoa(unescape(encodeURIComponent(content))),
+  };
+  if (sha) body.sha = sha;
+  const res = await fetch(`https://api.github.com/repos/${cfg.repo}/contents/${cfg.path}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${cfg.token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || `GitHub error: ${res.status}`);
+  }
+}
+
+// ── Format markdown entry ────────────────────────────────
+function formatEntry(subjects, dateStr) {
+  const displayDate = formatDisplayDate(new Date(dateStr + 'T12:00:00'));
+  let md = `## ${displayDate}\n\n`;
+  subjects.forEach(s => {
+    const name = s.name || 'Unknown subject';
+    md += `**${name.toUpperCase()}**\n`;
+    if (s.notes) {
+      const lines = s.notes.split('\n').map(l => l.trim()).filter(Boolean);
+      lines.forEach(l => {
+        md += l.startsWith('-') ? `${l}\n` : `- ${l}\n`;
+      });
+    }
+    if (s.flagged) {
+      md += `- ❓ ${s.flagNote || 'Needs review'}\n`;
+    }
+    md += '\n';
+  });
+  md += '---\n\n';
+  return md;
+}
+
+// ── Submit ───────────────────────────────────────────────
+async function submitLog() {
+  const subjects = getSubjects();
+  if (!subjects.length) { showStatus('Add at least one subject.', 'error'); return; }
+
+  const cfg = getConfig();
+  if (!cfg.token || !cfg.repo) {
+    showStatus('Open ⚙ Setup and add your GitHub token and repo.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const dateStr = todayStr();
+
+  try {
+    const { content, sha } = await getFileInfo(cfg);
+    const newEntry = formatEntry(subjects, dateStr);
+
+    // Prepend new entry so newest is at top
+    const updated = newEntry + content;
+    await putFile(cfg, updated, sha);
+
+    saveLocalEntry(dateStr, subjects);
+    buildStreak();
+    showStatus('✓ Saved to GitHub.', 'success');
+    renderPastEntries();
+  } catch (err) {
+    showStatus(`Error: ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save to log';
+  }
+}
+
+// ── Status ───────────────────────────────────────────────
+function showStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.className = `status ${type}`;
+  el.textContent = msg;
+  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ── Past entries (local) ─────────────────────────────────
+function renderPastEntries() {
+  const entries = getLocalEntries();
+  const past = document.getElementById('pastSection');
+  const keys = Object.keys(entries).sort().reverse().slice(0, 7);
+  if (!keys.length) { past.innerHTML = ''; return; }
+
+  let html = `<hr class="divider"><div class="section-heading">Recent entries</div>`;
+  keys.forEach(dateStr => {
+    const subjects = entries[dateStr];
+    const display = formatDisplayDate(new Date(dateStr + 'T12:00:00'));
+    const hasFlag = subjects.some(s => s.flagged);
+    html += `<div class="past-entry">
+      <div class="past-entry-date">${display}${hasFlag ? ' ❓' : ''}</div>
+      <div class="past-entry-content">${subjects.map(s =>
+        `${s.name.toUpperCase()}\n${s.notes}${s.flagged ? '\n❓ ' + (s.flagNote || 'Needs review') : ''}`
+      ).join('\n\n')}</div>
+    </div>`;
+  });
+  past.innerHTML = html;
+}
+
+// ── Init ─────────────────────────────────────────────────
+function init() {
+  document.getElementById('headerDate').textContent = formatDisplayDate(new Date());
+  buildStreak();
+  addSubject(); // start with one empty block
+  renderPastEntries();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,17 +1,32 @@
 {
   "student": "Sam",
   "timetable": {
-    "monday":    ["Specialist Maths", "Physics", "English"],
-    "tuesday":   ["Chemistry", "English", "History"],
-    "wednesday": ["Specialist Maths", "Physics", "PE"],
-    "thursday":  ["Chemistry", "History", "English"],
-    "friday":    ["Specialist Maths", "Physics", "Chemistry"]
+    "monday":    ["Specialist Maths", "Specialist Methods", "Physics"],
+    "tuesday":   ["English", "Flight", "Specialist Maths"],
+    "wednesday": ["Specialist Methods", "Physics", "English"],
+    "thursday":  ["Flight", "Specialist Maths", "Specialist Methods"],
+    "friday":    ["Physics", "English", "Flight"]
   },
   "termDates": {
-    "start": "2026-06-20",
+    "start": "2026-07-20",
     "end": "2026-09-18"
   },
-  "holidays": [
-    { "label": "Test holiday", "start": "2026-08-11", "end": "2026-08-11" }
-  ]
+  "holidays": [],
+  "subjects": {
+    "Specialist Maths": {
+      "syllabus": "https://www.bsss.act.edu.au/act_senior_secondary_system/curriculum/bsss_courses/mathematics/specialist_mathematics_t"
+    },
+    "Specialist Methods": {
+      "syllabus": "https://www.bsss.act.edu.au/act_senior_secondary_system/curriculum/bsss_courses/mathematics/specialist_methods_t"
+    },
+    "Physics": {
+      "syllabus": "https://www.bsss.act.edu.au/act_senior_secondary_system/curriculum/bsss_courses/science/physics_t"
+    },
+    "English": {
+      "syllabus": "https://www.bsss.act.edu.au/act_senior_secondary_system/curriculum/bsss_courses/english"
+    },
+    "Flight": {
+      "syllabus": null
+    }
+  }
 }

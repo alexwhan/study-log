@@ -804,9 +804,9 @@ async function submitLog() {
 
   const dateStr = todayStr();
   try {
-    const { content, sha } = await getFileInfo('log.md', setup);
+    const { content, sha } = await getFileInfo('_data/log.md', setup);
     const updated = formatEntry(subjects, dateStr) + content;
-    await putFile('log.md', updated, sha, setup, `Log entry ${dateStr}`);
+    await putFile('_data/log.md', updated, sha, setup, `Log entry ${dateStr}`);
     saveLocalEntry(dateStr, subjects);
     buildStreak(CONFIG, {});
     showStatus('✓ Saved to GitHub.', 'success');
@@ -879,7 +879,7 @@ async function init() {
   if (setup.token && setup.repo) {
     try {
       CONFIG = await loadConfig(setup);
-      const { content } = await getFileInfo('log.md', setup);
+      const { content } = await getFileInfo('_data/log.md', setup);
       loggedDates = parseLoggedDates(content);
     } catch (e) {
       console.warn('GitHub load error:', e);

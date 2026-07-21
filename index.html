@@ -1,896 +1,645 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Study Log</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2B4ECF">
+<title>Study Log</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --paper:#F2F4F6;
+  --card:#FFFFFF;
+  --line:#D5DCE4;
+  --line-soft:#E4E9EF;
+  --ink:#1C2833;
+  --muted:#5C6B7A;
+  --biro:#2B4ECF;
+  --biro-deep:#1F3BA6;
+  --biro-wash:#E8EDFB;
+  --low:#BF3B2B;
+  --med:#B07C1E;
+  --high:#2E7D5B;
+  --margin-rule:rgba(191,59,43,.28);
+  --mono:ui-monospace,"Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+  --sans:system-ui,Roboto,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  padding:0 16px calc(40px + env(safe-area-inset-bottom)) 16px;
+}
+/* exercise-book margin rule */
+body::before{
+  content:"";
+  position:fixed;
+  top:0;bottom:0;left:9px;
+  width:1.5px;
+  background:var(--margin-rule);
+  pointer-events:none;
+  z-index:0;
+}
+#app{max-width:560px;margin:0 auto;position:relative;z-index:1}
 
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #22263a;
-      --border: #2e3350;
-      --accent: #6ee7b7;
-      --accent-dim: #1a3d30;
-      --warn: #f59e0b;
-      --warn-dim: #2d2200;
-      --missed: #ef4444;
-      --missed-dim: #2d1010;
-      --text: #e2e8f0;
-      --text-muted: #64748b;
-      --text-dim: #94a3b8;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
-      --radius: 8px;
-    }
+/* ---------- masthead ---------- */
+header{padding:calc(18px + env(safe-area-inset-top)) 0 14px 0;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--biro);font-weight:600}
+h1{font-family:var(--mono);font-size:26px;font-weight:700;letter-spacing:-.01em;margin-top:4px}
+.streak{
+  text-align:right;font-family:var(--mono);
+  border:1px solid var(--line);background:var(--card);
+  border-radius:10px;padding:8px 12px;min-width:88px;
+}
+.streak b{font-size:22px;color:var(--biro);display:block;line-height:1.1}
+.streak span{font-size:10px;letter-spacing:.12em;color:var(--muted)}
+.streak.plus b::after{content:" +";color:var(--high);font-size:14px;vertical-align:top}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+/* ---------- shared ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.section-label{
+  font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  color:var(--muted);margin:22px 0 8px 2px;font-weight:600;
+}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-tap-highlight-color:transparent}
+input,select{font:inherit;color:var(--ink)}
+input:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--biro);outline-offset:2px;border-radius:4px}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 16px;
-      line-height: 1.5;
-      min-height: 100vh;
-      padding-bottom: 60px;
-    }
+/* ---------- banners ---------- */
+.banner{border-radius:10px;padding:10px 14px;font-size:14px;margin:10px 0;border:1px solid}
+.banner.err{background:#FBEDEA;border-color:#E8C2BB;color:var(--low)}
+.banner.ok{background:#EAF4EF;border-color:#C4DED2;color:var(--high)}
+.banner button{text-decoration:underline;font-weight:600;padding:0;margin-left:6px}
 
-    /* ── Header ── */
-    .header {
-      padding: 20px 20px 0;
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-    .header-left { display: flex; align-items: baseline; gap: 10px; }
-    .header-title {
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    .header-date {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .setup-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-    .setup-btn:hover { color: var(--text-dim); }
+/* ---------- today's subjects ---------- */
+.subject{border-top:1px solid var(--line-soft)}
+.subject:first-child{border-top:none}
+.subject-head{
+  width:100%;display:flex;align-items:center;gap:12px;
+  padding:15px 14px;text-align:left;font-size:16px;font-weight:600;
+}
+.subject-head .tick{
+  width:22px;height:22px;flex:none;border:1.5px solid var(--line);
+  border-radius:6px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:13px;color:transparent;transition:all .15s;
+}
+.subject.done .subject-head .tick{background:var(--biro);border-color:var(--biro);color:#fff}
+.subject.done .subject-head{color:var(--muted)}
+.subject-head .hint{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em}
+.subject.open .subject-head .hint{display:none}
 
-    /* ── Streak strip ── */
-    .streak-section { padding: 16px 20px 0; }
-    .streak-label {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-family: var(--mono);
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-    .streak-strip {
-      display: flex;
-      gap: 4px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .streak-strip::-webkit-scrollbar { display: none; }
-    .streak-day {
-      flex: 0 0 26px;
-      height: 26px;
-      border-radius: 4px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-    .streak-day.no-school { background: var(--bg); border-color: var(--bg); color: #2e3350; }
-    .streak-day.has-entry { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-    .streak-day.has-flag  { background: var(--warn-dim); border-color: var(--warn); color: var(--warn); }
-    .streak-day.missed    { background: var(--missed-dim); border-color: var(--missed); color: var(--missed); }
-    .streak-day.today     { border-width: 2px; }
-    .streak-day.future    { opacity: 0.3; }
+/* ---------- editor (ruled lines) ---------- */
+.editor{padding:2px 14px 16px 14px;display:none}
+.subject.open .editor,.editor.always{display:block}
+.row{display:flex;align-items:center;gap:10px;padding:2px 0}
+.row input[type=text]{
+  flex:1;border:none;border-bottom:1px solid var(--line);
+  background:transparent;padding:9px 2px;font-size:15px;min-width:0;
+}
+.row input[type=text]::placeholder{color:#A6B2BE}
+.row input[type=text]:focus{border-bottom-color:var(--biro);outline:none}
+.seg{display:flex;flex:none;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{
+  font-family:var(--mono);font-size:12px;font-weight:700;
+  padding:7px 9px;color:var(--muted);border-left:1px solid var(--line);
+}
+.seg button:first-child{border-left:none}
+.seg button[aria-pressed=true]{color:#fff}
+.seg button[data-v=low][aria-pressed=true]{background:var(--low)}
+.seg button[data-v=med][aria-pressed=true]{background:var(--med)}
+.seg button[data-v=high][aria-pressed=true]{background:var(--high)}
+.editor-actions{display:flex;gap:10px;margin-top:14px;align-items:center}
+.btn{
+  font-weight:700;font-size:15px;border-radius:10px;padding:11px 18px;
+  background:var(--biro);color:#fff;transition:background .15s;
+}
+.btn:active{background:var(--biro-deep)}
+.btn[disabled]{opacity:.55;cursor:default}
+.btn.ghost{background:none;color:var(--muted);font-weight:600;padding:11px 8px}
+.empty-note{padding:18px 14px;color:var(--muted);font-size:14px}
 
-    /* ── Non-school screens ── */
-    .screen-message {
-      margin: 40px 20px;
-      padding: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      text-align: center;
-    }
-    .screen-message .emoji { font-size: 36px; margin-bottom: 12px; }
-    .screen-message h2 {
-      font-family: var(--mono);
-      font-size: 14px;
-      color: var(--accent);
-      margin-bottom: 8px;
-      letter-spacing: 0.08em;
-    }
-    .screen-message p { font-size: 14px; color: var(--text-dim); }
+/* ---------- catch-up ---------- */
+details.catchup{margin-top:10px}
+details.catchup summary{
+  list-style:none;cursor:pointer;font-size:13px;color:var(--muted);
+  padding:8px 2px;font-weight:600;
+}
+details.catchup summary::before{content:"+ ";font-family:var(--mono);color:var(--biro)}
+details.catchup[open] summary::before{content:"− "}
+.catchup-controls{display:flex;gap:10px;padding:10px 14px 0 14px;flex-wrap:wrap}
+.catchup-controls select,.catchup-controls input[type=date]{
+  border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+  background:var(--card);font-size:14px;flex:1;min-width:130px;
+}
 
-    /* ── Main form ── */
-    .main { padding: 20px; }
+/* ---------- ledger grid ---------- */
+.ledger{padding:12px 10px 14px 14px;overflow-x:auto}
+.ledger table{border-collapse:collapse;width:100%}
+.ledger th{
+  font-family:var(--mono);font-weight:600;font-size:10px;color:var(--muted);
+  padding:0 0 8px 0;text-align:center;letter-spacing:.04em;white-space:pre-line;line-height:1.5;
+}
+.ledger th.subj,.ledger td.subj{
+  text-align:left;font-family:var(--sans);font-size:12.5px;font-weight:600;
+  color:var(--ink);padding-right:10px;max-width:118px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.ledger td{border-top:1px solid var(--line-soft);text-align:center;padding:0;height:34px}
+.cell{width:20px;height:20px;border-radius:5px;display:inline-block;vertical-align:middle}
+.cell.logged{background:var(--biro)}
+.cell.expected{border:1.5px dashed var(--line);background:transparent}
+.cell.extra{background:var(--biro-wash);border:1.5px solid var(--biro-wash)}
+.cell.off{width:5px;height:5px;border-radius:50%;background:var(--line)}
+.ledger .today-col{background:var(--biro-wash)}
+.legend{display:flex;gap:16px;padding:10px 2px 0 2px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px}
 
-    .section-heading {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .subjects-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-
-    .subject-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .subject-header {
-      display: flex;
-      align-items: center;
-      padding: 10px 12px;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    .subject-name {
-      flex: 1;
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text);
-    }
-    .subject-name-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      outline: none;
-    }
-    .subject-name-input::placeholder { color: var(--text-muted); }
-
-    .remove-subject {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 18px;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0 2px;
-    }
-    .remove-subject:hover { color: #ef4444; }
-
-    .subject-notes {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      font-family: var(--sans);
-      font-size: 14px;
-      font-weight: 300;
-      line-height: 1.6;
-      padding: 10px 12px;
-      resize: none;
-      outline: none;
-      min-height: 80px;
-    }
-    .subject-notes::placeholder { color: var(--text-muted); }
-
-    .flag-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-top: 1px solid var(--border);
-      background: var(--surface2);
-    }
-    .flag-toggle {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .flag-toggle input[type="checkbox"] {
-      appearance: none;
-      width: 16px; height: 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 3px;
-      background: transparent;
-      cursor: pointer;
-      position: relative;
-      flex-shrink: 0;
-    }
-    .flag-toggle input[type="checkbox"]:checked {
-      background: var(--warn-dim);
-      border-color: var(--warn);
-    }
-    .flag-toggle input[type="checkbox"]:checked::after {
-      content: '✓';
-      position: absolute;
-      top: -1px; left: 2px;
-      font-size: 11px;
-      color: var(--warn);
-    }
-    .flag-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
-    .flag-toggle input:checked ~ .flag-label { color: var(--warn); }
-    .flag-note {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: var(--warn);
-      font-size: 13px;
-      font-family: var(--sans);
-      outline: none;
-      display: none;
-      min-width: 0;
-    }
-    .flag-note::placeholder { color: #6b5a2a; }
-    .flag-note.visible { display: block; }
-
-    .add-subject-btn {
-      width: 100%;
-      padding: 10px;
-      background: transparent;
-      border: 1.5px dashed var(--border);
-      border-radius: var(--radius);
-      color: var(--text-muted);
-      font-family: var(--mono);
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-      margin-bottom: 20px;
-    }
-    .add-subject-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    .submit-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius);
-      color: #0a1a14;
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .submit-btn:active { transform: scale(0.98); }
-    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .status {
-      margin-top: 12px;
-      padding: 10px 14px;
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-family: var(--mono);
-      display: none;
-    }
-    .status.success { display: block; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); }
-    .status.error   { display: block; background: #2d1a1a; border: 1px solid #ef4444; color: #ef4444; }
-
-    /* ── Setup panel ── */
-    .setup-panel {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 100;
-      overflow-y: auto;
-      padding: 24px 20px 60px;
-    }
-    .setup-panel.open { display: block; }
-    .setup-panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
-    .setup-panel-title {
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .close-setup {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-size: 22px;
-      cursor: pointer;
-      line-height: 1;
-    }
-    .setup-field { margin-bottom: 18px; }
-    .setup-label {
-      display: block;
-      font-size: 11px;
-      font-family: var(--mono);
-      color: var(--text-muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .setup-hint {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      font-family: var(--sans);
-    }
-    .setup-input {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 13px;
-      padding: 10px 12px;
-      outline: none;
-    }
-    .setup-input:focus { border-color: var(--accent); }
-    .setup-save-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent);
-      border: none;
-      border-radius: var(--radius);
-      color: #0a1a14;
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    /* ── Past entries ── */
-    .past-section { margin-top: 32px; }
-    .past-entry {
-      margin-top: 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-    }
-    .past-entry-date {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-    .past-entry-content {
-      font-size: 13px;
-      color: var(--text-dim);
-      white-space: pre-wrap;
-      font-family: var(--mono);
-      line-height: 1.7;
-    }
-
-    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
-
-    /* ── Legend ── */
-    .legend {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-    .legend-dot {
-      width: 10px; height: 10px;
-      border-radius: 2px;
-      border: 1px solid;
-    }
-    .legend-dot.entry  { background: var(--accent-dim); border-color: var(--accent); }
-    .legend-dot.flag   { background: var(--warn-dim);   border-color: var(--warn); }
-    .legend-dot.missed { background: var(--missed-dim); border-color: var(--missed); }
-    .legend-dot.noschool { background: var(--bg); border-color: #2e3350; }
-  </style>
+/* ---------- setup ---------- */
+.setup{padding:18px 16px}
+.setup h2{font-family:var(--mono);font-size:17px;margin-bottom:4px}
+.setup p{font-size:13.5px;color:var(--muted);margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);margin-bottom:5px;font-weight:600}
+.field input{
+  width:100%;border:1px solid var(--line);border-radius:8px;
+  padding:11px 12px;font-size:15px;background:var(--card);
+}
+.field input:focus{border-color:var(--biro);outline:none}
+.setup .status{font-size:13.5px;margin-top:10px;min-height:1.4em}
+.setup .status.err{color:var(--low)}
+footer{margin-top:34px;text-align:center}
+footer button{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted);text-decoration:underline}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-left">
-    <span class="header-title">Study Log</span>
-    <span class="header-date" id="headerDate"></span>
-  </div>
-  <button class="setup-btn" onclick="openSetup()">⚙ Setup</button>
-</div>
-
-<div class="streak-section">
-  <div class="streak-label" id="streakLabel">Loading…</div>
-  <div class="streak-strip" id="streakStrip"></div>
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot entry"></div> logged</div>
-    <div class="legend-item"><div class="legend-dot flag"></div> flagged</div>
-    <div class="legend-item"><div class="legend-dot missed"></div> missed</div>
-    <div class="legend-item"><div class="legend-dot noschool"></div> no school</div>
-  </div>
-</div>
-
-<div id="appBody"></div>
-
-<!-- Setup panel -->
-<div class="setup-panel" id="setupPanel">
-  <div class="setup-panel-header">
-    <span class="setup-panel-title">Setup</span>
-    <button class="close-setup" onclick="closeSetup()">×</button>
-  </div>
-  <div class="setup-field">
-    <label class="setup-label">GitHub Token</label>
-    <div class="setup-hint">Fine-grained token with Contents: read & write on this repo</div>
-    <input class="setup-input" id="cfgToken" type="password" placeholder="github_pat_..." />
-  </div>
-  <div class="setup-field">
-    <label class="setup-label">Repo</label>
-    <div class="setup-hint">owner/repo-name</div>
-    <input class="setup-input" id="cfgRepo" placeholder="alexwhan/study-log" />
-  </div>
-  <button class="setup-save-btn" onclick="saveSetup()">Save</button>
+<div id="app">
+  <header>
+    <div>
+      <div class="eyebrow">STUDY LOG</div>
+      <h1 id="dateLine"></h1>
+    </div>
+    <div class="streak" id="streakBox" hidden>
+      <b id="streakNum">0</b><span>DAY STREAK</span>
+    </div>
+  </header>
+  <div id="banner"></div>
+  <main id="main"></main>
+  <footer><button id="settingsBtn" hidden>SETTINGS</button></footer>
 </div>
 
 <script>
-// ── Local storage ────────────────────────────────────────
-const SETUP_KEY   = 'studylog_setup';
-const ENTRIES_KEY = 'studylog_entries';
+"use strict";
+/* ================= constants & state ================= */
+const LS_CFG = "studylog.config";
+const LS_TT  = "studylog.timetable";
+const API    = "https://api.github.com";
+const DAYKEYS = ["sun","mon","tue","wed","thu","fri","sat"];
+const RATINGS = { low:"low", med:"med", high:"high" };
 
-function getSetup() {
-  try { return JSON.parse(localStorage.getItem(SETUP_KEY)) || {}; } catch { return {}; }
-}
-function getLocalEntries() {
-  try { return JSON.parse(localStorage.getItem(ENTRIES_KEY)) || {}; } catch { return {}; }
-}
-function saveLocalEntry(dateStr, subjects) {
-  const e = getLocalEntries();
-  e[dateStr] = subjects;
-  localStorage.setItem(ENTRIES_KEY, JSON.stringify(e));
-}
+let cfg = null;          // {profile, repo, token}
+let timetable = null;    // {week:{mon:[...]}, holidays:[...]}
+let logMap = {};         // { "2026-07-21": Set(subjects) }
+let fileSha = null;      // sha of current semester file (null if absent)
 
-// ── Date helpers ─────────────────────────────────────────
-function todayStr() { return localDateStr(new Date()); }
-function localDateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+/* ================= date helpers ================= */
+const pad = n => String(n).padStart(2,"0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayIso = () => iso(new Date());
+function fmtHeader(d){
+  return d.toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short"});
 }
-function dayName(d) {
-  return ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][d.getDay()];
+function semesterPath(){
+  const d = new Date();
+  const s = d.getMonth()+1 >= 7 ? 2 : 1;
+  return `${cfg.profile}/${d.getFullYear()}-S${s}.md`;
 }
-function displayDate(d) {
-  return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+function isSchoolDay(d){
+  const wd = d.getDay();
+  if (wd === 0 || wd === 6) return false;
+  const hols = (timetable && timetable.holidays) || [];
+  return !hols.includes(iso(d));
 }
-function parseLocalDate(str) {
-  const [y,m,d] = str.split('-').map(Number);
-  return new Date(y, m-1, d);
-}
-
-// ── GitHub API ───────────────────────────────────────────
-async function ghFetch(path, setup) {
-  const res = await fetch(`https://api.github.com/repos/${setup.repo}/contents/${path}`, {
-    headers: { Authorization: `Bearer ${setup.token}`, Accept: 'application/vnd.github+json' }
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub ${res.status}`);
-  return res.json();
-}
-
-async function getFileInfo(path, setup) {
-  const data = await ghFetch(path, setup);
-  if (!data) return { content: '', sha: null };
-  return { content: atob(data.content.replace(/\n/g,'')), sha: data.sha };
-}
-
-async function putFile(path, content, sha, setup, message) {
-  const body = { message, content: btoa(unescape(encodeURIComponent(content))) };
-  if (sha) body.sha = sha;
-  const res = await fetch(`https://api.github.com/repos/${setup.repo}/contents/${path}`, {
-    method: 'PUT',
-    headers: {
-      Authorization: `Bearer ${setup.token}`,
-      Accept: 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) { const e = await res.json(); throw new Error(e.message || `GitHub ${res.status}`); }
-}
-
-// ── Config from GitHub ───────────────────────────────────
-let CONFIG = null;
-
-async function loadConfig(setup) {
-  try {
-    const data = await ghFetch('config.json', setup);
-    if (!data) return null;
-    return JSON.parse(atob(data.content.replace(/\n/g,'')));
-  } catch { return null; }
-}
-
-// ── Parse log.md for logged dates ───────────────────────
-function parseLoggedDates(content) {
-  const logged = {};
-  const lines = content.split('\n');
-  for (const line of lines) {
-    const m = line.match(/^## (.+)$/);
-    if (m) {
-      // Try to find a date in YYYY-MM-DD somewhere, or parse the display date
-      const isoMatch = line.match(/(\d{4}-\d{2}-\d{2})/);
-      if (isoMatch) { logged[isoMatch[1]] = true; continue; }
-      // Try parsing display date like "Monday 20 July 2026"
-      try {
-        const d = new Date(m[1]);
-        if (!isNaN(d)) logged[localDateStr(d)] = true;
-      } catch {}
-    }
+function lastSchoolDays(n){
+  const out = [];
+  const d = new Date();
+  let guard = 0;
+  while (out.length < n && guard++ < 400){
+    if (isSchoolDay(d)) out.push(iso(d));
+    d.setDate(d.getDate()-1);
   }
-  return logged;
+  return out.reverse();
+}
+function subjectsFor(dateStr){
+  if (!timetable) return [];
+  const d = new Date(dateStr + "T12:00:00");
+  return timetable.week[DAYKEYS[d.getDay()]] || [];
+}
+function allSubjects(){
+  const seen = [];
+  for (const k of ["mon","tue","wed","thu","fri"])
+    for (const s of (timetable.week[k] || []))
+      if (!seen.includes(s)) seen.push(s);
+  return seen;
 }
 
-// ── School day logic ─────────────────────────────────────
-function isWeekend(d) { const day = d.getDay(); return day === 0 || day === 6; }
-
-function isHoliday(dateStr, cfg) {
-  if (!cfg || !cfg.holidays) return false;
-  return cfg.holidays.some(h => dateStr >= h.start && dateStr <= h.end);
+/* ================= base64 utf-8 ================= */
+function b64encode(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64decode(b64){
+  const bin = atob(b64.replace(/\s/g,""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
-function isInTerm(dateStr, cfg) {
-  if (!cfg || !cfg.termDates) return true; // no config = assume in term
-  return dateStr >= cfg.termDates.start && dateStr <= cfg.termDates.end;
+/* ================= GitHub API ================= */
+class AuthError extends Error {}
+function ghHeaders(){
+  return {
+    "Authorization": "Bearer " + cfg.token,
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28"
+  };
 }
-
-function isSchoolDay(dateStr, cfg) {
-  const d = parseLocalDate(dateStr);
-  if (isWeekend(d)) return false;
-  if (!isInTerm(dateStr, cfg)) return false;
-  if (isHoliday(dateStr, cfg)) return false;
+async function ghGet(path){
+  const r = await fetch(`${API}/repos/${cfg.repo}/contents/${path}`, { headers: ghHeaders() });
+  if (r.status === 404) return null;
+  if (r.status === 401 || r.status === 403) throw new AuthError();
+  if (!r.ok) throw new Error("GitHub read failed (" + r.status + ")");
+  const j = await r.json();
+  return { text: b64decode(j.content), sha: j.sha };
+}
+async function ghPut(path, text, sha, message){
+  const body = { message, content: b64encode(text) };
+  if (sha) body.sha = sha;
+  const r = await fetch(`${API}/repos/${cfg.repo}/contents/${path}`, {
+    method: "PUT", headers: ghHeaders(), body: JSON.stringify(body)
+  });
+  if (r.status === 401 || r.status === 403) throw new AuthError();
+  if (r.status === 409) return false;           // sha conflict — caller retries
+  if (!r.ok) throw new Error("GitHub write failed (" + r.status + ")");
+  const j = await r.json();
+  fileSha = j.content.sha;
   return true;
 }
 
-function getSubjectsForDay(dateStr, cfg) {
-  if (!cfg || !cfg.timetable) return null;
-  const d = parseLocalDate(dateStr);
-  const name = dayName(d);
-  return cfg.timetable[name] || null;
-}
-
-// ── Streak strip ─────────────────────────────────────────
-function buildStreak(cfg, loggedDates) {
-  const strip = document.getElementById('streakStrip');
-  const label = document.getElementById('streakLabel');
-  strip.innerHTML = '';
-
-  const today = new Date();
-  const todayS = todayStr();
-
-  // Show term days if we have term dates, else show current month
-  let days = [];
-  if (cfg && cfg.termDates) {
-    label.textContent = 'This term';
-    const start = parseLocalDate(cfg.termDates.start);
-    const end   = parseLocalDate(cfg.termDates.end);
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
-      days.push(localDateStr(new Date(d)));
-    }
-  } else {
-    const y = today.getFullYear(), m = today.getMonth();
-    const daysInMonth = new Date(y, m+1, 0).getDate();
-    label.textContent = 'This month';
-    for (let d = 1; d <= daysInMonth; d++) {
-      days.push(`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
-    }
+/* ================= log file parse / build ================= */
+function parseLog(text){
+  const map = {};
+  let cur = null;
+  for (const line of text.split("\n")){
+    let m = line.match(/^## (\d{4}-\d{2}-\d{2})/);
+    if (m){ cur = m[1]; if (!map[cur]) map[cur] = new Set(); continue; }
+    m = line.match(/^### (.+)/);
+    if (m && cur) map[cur].add(m[1].trim());
   }
-
-  const localEntries = getLocalEntries();
-
-  days.forEach(dateStr => {
-    const d = parseLocalDate(dateStr);
-    const dayNum = d.getDate();
-    const isToday = dateStr === todayS;
-    const isFuture = dateStr > todayS;
-    const schoolDay = isSchoolDay(dateStr, cfg);
-
-    const el = document.createElement('div');
-    el.title = dateStr;
-
-    if (!schoolDay) {
-      el.className = 'streak-day no-school' + (isToday ? ' today' : '');
-      el.textContent = dayNum;
-    } else if (isFuture) {
-      el.className = 'streak-day future' + (isToday ? ' today' : '');
-      el.textContent = dayNum;
-    } else {
-      const logged = loggedDates[dateStr] || localEntries[dateStr];
-      const flagged = localEntries[dateStr] && localEntries[dateStr].some(s => s.flagged);
-      if (flagged) {
-        el.className = 'streak-day has-flag' + (isToday ? ' today' : '');
-      } else if (logged) {
-        el.className = 'streak-day has-entry' + (isToday ? ' today' : '');
-      } else {
-        el.className = 'streak-day missed' + (isToday ? ' today' : '');
-      }
-      el.textContent = dayNum;
-    }
-
-    strip.appendChild(el);
-    if (isToday) setTimeout(() => el.scrollIntoView({ inline: 'center', behavior: 'smooth' }), 200);
-  });
+  return map;
 }
-
-// ── Render app body ──────────────────────────────────────
-function renderApp(cfg) {
-  const body = document.getElementById('appBody');
-  const today = new Date();
-  const todayS = todayStr();
-
-  // Weekend
-  if (isWeekend(today)) {
-    body.innerHTML = `
-      <div class="screen-message">
-        <div class="emoji">🏖️</div>
-        <h2>Weekend</h2>
-        <p>No school today. Enjoy the break${cfg && cfg.student ? ', ' + cfg.student : ''}.</p>
-      </div>`;
-    return;
+function buildBlock(subject, items){
+  const lines = items.map(it => `- ${it.text} — **${it.rating}**`);
+  return `### ${subject}\n\n${lines.join("\n")}\n`;
+}
+function insertEntry(text, dateStr, block){
+  if (!text) text = `# Study log — ${cfg.profile}\n`;
+  const headRe = new RegExp(`^## ${dateStr}\\s*$`, "m");
+  const m = text.match(headRe);
+  if (m){
+    // insert at end of this date's section (before next "## " or EOF)
+    const after = text.slice(m.index + m[0].length);
+    const next = after.search(/^## /m);
+    const insertAt = next === -1 ? text.length : m.index + m[0].length + next;
+    const before = text.slice(0, insertAt).replace(/\n*$/,"\n\n");
+    return before + block + "\n" + text.slice(insertAt);
   }
-
-  // Outside term
-  if (cfg && !isInTerm(todayS, cfg)) {
-    body.innerHTML = `
-      <div class="screen-message">
-        <div class="emoji">📅</div>
-        <h2>School holidays</h2>
-        <p>Term starts ${cfg.termDates.start}.</p>
-      </div>`;
-    return;
-  }
-
-  // Holiday
-  if (cfg && isHoliday(todayS, cfg)) {
-    const hol = cfg.holidays.find(h => todayS >= h.start && todayS <= h.end);
-    body.innerHTML = `
-      <div class="screen-message">
-        <div class="emoji">🎉</div>
-        <h2>${hol ? hol.label : 'Public holiday'}</h2>
-        <p>No school today.</p>
-      </div>`;
-    return;
-  }
-
-  // Normal school day
-  const subjects = getSubjectsForDay(todayS, cfg);
-  const greeting = cfg && cfg.student ? `${cfg.student}'s log` : "Today's classes";
-
-  body.innerHTML = `
-    <div class="main">
-      <hr class="divider">
-      <div class="section-heading">${greeting} — ${displayDate(today)}</div>
-      <div class="subjects-list" id="subjectsList"></div>
-      <button class="add-subject-btn" onclick="addSubject()">+ Add subject</button>
-      <button class="submit-btn" id="submitBtn" onclick="submitLog()">Save to log</button>
-      <div class="status" id="status"></div>
-      <div class="past-section" id="pastSection"></div>
-    </div>`;
-
-  if (subjects && subjects.length) {
-    subjects.forEach(name => addSubject(name));
-  } else {
-    addSubject();
-  }
-
-  renderPastEntries();
+  return text.replace(/\n*$/,"\n\n") + `## ${dateStr}\n\n` + block;
 }
 
-// ── Subject blocks ───────────────────────────────────────
-let subjectCount = 0;
-
-function addSubject(name = '', notes = '', flagged = false, flagNote = '') {
-  subjectCount++;
-  const id = subjectCount;
-  const list = document.getElementById('subjectsList');
-  if (!list) return;
-  const block = document.createElement('div');
-  block.className = 'subject-block';
-  block.id = `subject-${id}`;
-  const nameHTML = name
-    ? `<span class="subject-name">${name}</span>`
-    : `<input class="subject-name-input" placeholder="SUBJECT" value="" />`;
-  block.innerHTML = `
-    <div class="subject-header">
-      ${nameHTML}
-      <button class="remove-subject" onclick="removeSubject(${id})">×</button>
-    </div>
-    <textarea class="subject-notes" placeholder="- Topic covered&#10;- Another topic&#10;- ..." rows="4">${notes}</textarea>
-    <div class="flag-row">
-      <label class="flag-toggle">
-        <input type="checkbox" id="flag-${id}" ${flagged ? 'checked' : ''} onchange="toggleFlagNote(${id})" />
-        <span class="flag-label">❓ Didn't click</span>
-      </label>
-      <input class="flag-note ${flagged ? 'visible' : ''}" id="flagnote-${id}" placeholder="What specifically?" value="${flagNote}" />
-    </div>`;
-  list.appendChild(block);
-}
-
-function removeSubject(id) {
-  const el = document.getElementById(`subject-${id}`);
-  if (el) el.remove();
-}
-function toggleFlagNote(id) {
-  const cb = document.getElementById(`flag-${id}`);
-  const note = document.getElementById(`flagnote-${id}`);
-  note.classList.toggle('visible', cb.checked);
-  if (cb.checked) note.focus();
-}
-function getSubjects() {
-  const blocks = document.querySelectorAll('.subject-block');
-  return Array.from(blocks).map(block => {
-    const nameEl = block.querySelector('.subject-name');
-    const nameInput = block.querySelector('.subject-name-input');
-    const name = nameEl ? nameEl.textContent.trim() : (nameInput ? nameInput.value.trim() : '');
-    const notes = block.querySelector('.subject-notes').value.trim();
-    const flagged = block.querySelector('input[type="checkbox"]').checked;
-    const flagNote = block.querySelector('.flag-note').value.trim();
-    return { name, notes, flagged, flagNote };
-  }).filter(s => s.name || s.notes);
-}
-
-// ── Format markdown ──────────────────────────────────────
-function formatEntry(subjects, dateStr) {
-  const d = parseLocalDate(dateStr);
-  let md = `## ${displayDate(d)} (${dateStr})\n\n`;
-  subjects.forEach(s => {
-    md += `**${(s.name || 'Unknown').toUpperCase()}**\n`;
-    if (s.notes) {
-      s.notes.split('\n').map(l => l.trim()).filter(Boolean).forEach(l => {
-        md += l.startsWith('-') ? `${l}\n` : `- ${l}\n`;
-      });
-    }
-    if (s.flagged) md += `- ❓ ${s.flagNote || 'Needs review'}\n`;
-    md += '\n';
-  });
-  md += '---\n\n';
-  return md;
-}
-
-// ── Submit ───────────────────────────────────────────────
-async function submitLog() {
-  const subjects = getSubjects();
-  if (!subjects.length) { showStatus('Add at least one subject first.', 'error'); return; }
-  const setup = getSetup();
-  if (!setup.token || !setup.repo) { showStatus('Open ⚙ Setup and add your GitHub token and repo.', 'error'); return; }
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true; btn.textContent = 'Saving…';
-
-  const dateStr = todayStr();
+/* ================= sync ================= */
+async function loadTimetable(force){
+  const cached = JSON.parse(localStorage.getItem(LS_TT) || "null");
+  const fresh = cached && (Date.now() - cached.at < 24*3600*1000);
+  if (cached && fresh && !force){ timetable = cached.data; return; }
   try {
-    const { content, sha } = await getFileInfo('_data/log.md', setup);
-    const updated = formatEntry(subjects, dateStr) + content;
-    await putFile('_data/log.md', updated, sha, setup, `Log entry ${dateStr}`);
-    saveLocalEntry(dateStr, subjects);
-    buildStreak(CONFIG, {});
-    showStatus('✓ Saved to GitHub.', 'success');
-    renderPastEntries();
-  } catch (err) {
-    showStatus(`Error: ${err.message}`, 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Save to log';
+    const f = await ghGet(`${cfg.profile}/timetable.json`);
+    if (!f) throw new Error("timetable missing");
+    timetable = JSON.parse(f.text);
+    localStorage.setItem(LS_TT, JSON.stringify({ at: Date.now(), data: timetable }));
+  } catch (e){
+    if (e instanceof AuthError) throw e;
+    if (cached){ timetable = cached.data; return; }   // offline fallback
+    throw e;
   }
 }
-
-function showStatus(msg, type) {
-  const el = document.getElementById('status');
-  if (!el) return;
-  el.className = `status ${type}`;
-  el.textContent = msg;
-  if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
+async function loadLog(){
+  const f = await ghGet(semesterPath());
+  if (f){ logMap = parseLog(f.text); fileSha = f.sha; }
+  else  { logMap = {}; fileSha = null; }
+}
+async function saveEntry(dateStr, subject, items){
+  const block = buildBlock(subject, items);
+  for (let attempt = 0; attempt < 2; attempt++){
+    const f = await ghGet(semesterPath());
+    const text = f ? f.text : "";
+    const sha  = f ? f.sha  : null;
+    const ok = await ghPut(
+      semesterPath(),
+      insertEntry(text, dateStr, block),
+      sha,
+      `${cfg.profile}: ${subject} ${dateStr}`
+    );
+    if (ok) return;
+  }
+  throw new Error("Couldn't save after retry — try again");
 }
 
-// ── Past entries ─────────────────────────────────────────
-function renderPastEntries() {
-  const past = document.getElementById('pastSection');
-  if (!past) return;
-  const entries = getLocalEntries();
-  const keys = Object.keys(entries).sort().reverse().slice(0, 5);
-  if (!keys.length) { past.innerHTML = ''; return; }
-  let html = `<hr class="divider"><div class="section-heading">Recent entries (this device)</div>`;
-  keys.forEach(dateStr => {
-    const subjects = entries[dateStr];
-    const d = parseLocalDate(dateStr);
-    const hasFlag = subjects.some(s => s.flagged);
-    html += `<div class="past-entry">
-      <div class="past-entry-date">${displayDate(d)}${hasFlag ? ' ❓' : ''}</div>
-      <div class="past-entry-content">${subjects.map(s =>
-        `${s.name.toUpperCase()}${s.notes ? '\n' + s.notes : ''}${s.flagged ? '\n❓ ' + (s.flagNote || 'Needs review') : ''}`
-      ).join('\n\n')}</div>
-    </div>`;
-  });
-  past.innerHTML = html;
+/* ================= streak ================= */
+function computeStreak(){
+  let count = 0, loggedToday = false;
+  const d = new Date();
+  let first = true, guard = 0;
+  while (guard++ < 500){
+    if (isSchoolDay(d)){
+      const has = logMap[iso(d)] && logMap[iso(d)].size > 0;
+      if (has){ count++; if (first && iso(d) === todayIso()) loggedToday = true; }
+      else if (first && iso(d) === todayIso()){ /* today pending — don't break */ }
+      else break;
+      first = false;
+    }
+    d.setDate(d.getDate()-1);
+  }
+  return { count, loggedToday };
 }
 
-// ── Setup panel ──────────────────────────────────────────
-function openSetup() {
-  const s = getSetup();
-  document.getElementById('cfgToken').value = s.token || '';
-  document.getElementById('cfgRepo').value  = s.repo  || '';
-  document.getElementById('setupPanel').classList.add('open');
+/* ================= UI helpers ================= */
+const $ = sel => document.querySelector(sel);
+function el(tag, attrs = {}, ...children){
+  const n = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)){
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined) n.setAttribute(k, v);
+  }
+  for (const c of children) n.append(c);
+  return n;
 }
-function closeSetup() {
-  document.getElementById('setupPanel').classList.remove('open');
+function banner(kind, msg, action){
+  const b = $("#banner");
+  b.innerHTML = "";
+  if (!msg) return;
+  const div = el("div", { class: "banner " + kind }, msg);
+  if (action) div.append(action);
+  b.append(div);
 }
-function saveSetup() {
-  const setup = {
-    token: document.getElementById('cfgToken').value.trim(),
-    repo:  document.getElementById('cfgRepo').value.trim(),
-  };
-  localStorage.setItem(SETUP_KEY, JSON.stringify(setup));
-  closeSetup();
-  init();
+function authBanner(){
+  banner("err", "Access token expired or not accepted. ",
+    el("button", { onclick: () => showSetup() }, "Open settings"));
 }
 
-// ── Init ─────────────────────────────────────────────────
-async function init() {
-  document.getElementById('headerDate').textContent = displayDate(new Date());
+/* ================= editor component ================= */
+function makeEditor(getDate, subject, onSaved){
+  const rows = el("div");
+  const wrap = el("div", { class: "editor" });
 
-  const setup = getSetup();
+  function addRow(){
+    const seg = el("div", { class: "seg" });
+    let rating = "med";
+    for (const [v, label] of [["low","L"],["med","M"],["high","H"]]){
+      const b = el("button", {
+        type: "button", "data-v": v, "aria-pressed": v === "med" ? "true" : "false",
+        "aria-label": v + " understanding",
+        onclick: () => {
+          rating = v;
+          seg.querySelectorAll("button").forEach(x =>
+            x.setAttribute("aria-pressed", x.dataset.v === v ? "true" : "false"));
+        }
+      }, label);
+      seg.append(b);
+    }
+    const input = el("input", {
+      type: "text", placeholder: "concept covered…", enterkeyhint: "next",
+      oninput: () => { if (row === rows.lastElementChild && input.value.trim()) addRow(); }
+    });
+    const row = el("div", { class: "row" }, input, seg);
+    row._get = () => ({ text: input.value.trim(), rating });
+    rows.append(row);
+  }
+  addRow();
 
-  // Load config and log from GitHub if we have credentials
-  let loggedDates = {};
-  if (setup.token && setup.repo) {
+  const saveBtn = el("button", { class: "btn", type: "button" }, `Log ${subject}`);
+  saveBtn.addEventListener("click", async () => {
+    const items = [...rows.children].map(r => r._get()).filter(i => i.text);
+    if (!items.length){ banner("err", "Add at least one concept first."); return; }
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = "";
+    saveBtn.append(el("span", { class: "spin" }), "Saving…");
     try {
-      CONFIG = await loadConfig(setup);
-      const { content } = await getFileInfo('_data/log.md', setup);
-      loggedDates = parseLoggedDates(content);
-    } catch (e) {
-      console.warn('GitHub load error:', e);
+      await saveEntry(getDate(), subject, items);
+      banner("ok", `${subject} logged.`);
+      await loadLog();
+      onSaved();
+    } catch (e){
+      if (e instanceof AuthError) authBanner();
+      else banner("err", e.message || "Save failed — check your connection.");
+      saveBtn.disabled = false;
+      saveBtn.textContent = `Log ${subject}`;
+    }
+  });
+
+  wrap.append(rows, el("div", { class: "editor-actions" }, saveBtn));
+  return wrap;
+}
+
+/* ================= main view ================= */
+function renderMain(){
+  const main = $("#main");
+  main.innerHTML = "";
+  $("#settingsBtn").hidden = false;
+
+  /* streak */
+  const s = computeStreak();
+  const box = $("#streakBox");
+  box.hidden = false;
+  $("#streakNum").textContent = s.count;
+  box.classList.toggle("plus", s.loggedToday);
+  box.title = s.loggedToday ? "Includes today" : "Log today to keep it going";
+
+  /* today */
+  main.append(el("div", { class: "section-label" }, "TODAY"));
+  const todayCard = el("div", { class: "card" });
+  const subs = subjectsFor(todayIso());
+  const doneToday = logMap[todayIso()] || new Set();
+
+  if (!subs.length){
+    todayCard.append(el("div", { class: "empty-note" },
+      "No classes today. Use the catch-up entry below if you want to log something."));
+  }
+  for (const subject of subs){
+    const row = el("div", { class: "subject" + (doneToday.has(subject) ? " done" : "") });
+    const editor = makeEditor(() => todayIso(), subject, renderMain);
+    const head = el("button", { class: "subject-head", type: "button",
+      onclick: () => {
+        const open = row.classList.toggle("open");
+        if (open) row.querySelector("input[type=text]").focus();
+      }},
+      el("span", { class: "tick" }, "✓"),
+      subject,
+      el("span", { class: "hint" }, doneToday.has(subject) ? "logged" : "tap to log")
+    );
+    row.append(head, editor);
+    todayCard.append(row);
+  }
+  main.append(todayCard);
+
+  /* catch-up */
+  const det = el("details", { class: "catchup" });
+  det.append(el("summary", {}, "Log another day or subject"));
+  const cu = el("div", { class: "card" });
+  const dateIn = el("input", { type: "date", value: todayIso(), max: todayIso() });
+  const sel = el("select");
+  for (const sub of allSubjects()) sel.append(el("option", { value: sub }, sub));
+  const cuEditorHolder = el("div");
+  function mountCuEditor(){
+    cuEditorHolder.innerHTML = "";
+    const ed = makeEditor(() => dateIn.value, sel.value, renderMain);
+    ed.classList.add("always");
+    cuEditorHolder.append(ed);
+  }
+  sel.addEventListener("change", mountCuEditor);
+  mountCuEditor();
+  cu.append(el("div", { class: "catchup-controls" }, dateIn, sel), cuEditorHolder);
+  det.append(cu);
+  main.append(det);
+
+  /* ledger */
+  main.append(el("div", { class: "section-label" }, "LAST 10 SCHOOL DAYS"));
+  const ledger = el("div", { class: "card" });
+  const scroller = el("div", { class: "ledger" });
+  const days = lastSchoolDays(10);
+  const table = el("table");
+  const headRow = el("tr", {}, el("th", { class: "subj" }, ""));
+  for (const day of days){
+    const d = new Date(day + "T12:00:00");
+    const th = el("th", {}, "SMTWTFS"[d.getDay()] + "\n" + pad(d.getDate()));
+    if (day === todayIso()) th.classList.add("today-col");
+    headRow.append(th);
+  }
+  table.append(headRow);
+  for (const subject of allSubjects()){
+    const tr = el("tr", {}, el("td", { class: "subj" }, subject));
+    for (const day of days){
+      const expected = subjectsFor(day).includes(subject);
+      const logged = logMap[day] && logMap[day].has(subject);
+      let cls = "off";
+      if (logged) cls = expected ? "logged" : "extra";
+      else if (expected) cls = "expected";
+      const td = el("td", {}, el("span", { class: "cell " + cls }));
+      if (day === todayIso()) td.classList.add("today-col");
+      tr.append(td);
+    }
+    table.append(tr);
+  }
+  scroller.append(table);
+  ledger.append(scroller);
+  main.append(ledger);
+  main.append(el("div", { class: "legend" },
+    el("span", {}, el("i", { class: "cell logged" }), " logged"),
+    el("span", {}, el("i", { class: "cell expected" }), " missed"),
+    el("span", {}, el("i", { class: "cell off" }), " no class")
+  ));
+}
+
+/* ================= setup view ================= */
+function showSetup(){
+  const main = $("#main");
+  main.innerHTML = "";
+  $("#banner").innerHTML = "";
+  $("#streakBox").hidden = true;
+  $("#settingsBtn").hidden = true;
+
+  const profile = el("input", { autocapitalize: "none", autocomplete: "off",
+    value: cfg ? cfg.profile : "", placeholder: "e.g. hugo" });
+  const repo = el("input", { autocapitalize: "none", autocomplete: "off",
+    value: cfg ? cfg.repo : "alexwhan/study-log-notes" });
+  const token = el("input", { type: "password", autocomplete: "off",
+    value: cfg ? cfg.token : "", placeholder: "github_pat_…" });
+  const status = el("div", { class: "status" });
+  const save = el("button", { class: "btn", type: "button" }, "Save & connect");
+
+  save.addEventListener("click", async () => {
+    const trial = {
+      profile: profile.value.trim().toLowerCase(),
+      repo: repo.value.trim(),
+      token: token.value.trim()
+    };
+    if (!trial.profile || !trial.repo || !trial.token){
+      status.className = "status err"; status.textContent = "All three fields are needed."; return;
+    }
+    save.disabled = true;
+    status.className = "status"; status.textContent = "Checking…";
+    const prev = cfg;
+    cfg = trial;
+    try {
+      localStorage.removeItem(LS_TT);
+      await loadTimetable(true);
+      localStorage.setItem(LS_CFG, JSON.stringify(cfg));
+      await loadLog();
+      renderMain();
+    } catch (e){
+      cfg = prev;
+      status.className = "status err";
+      status.textContent = e instanceof AuthError
+        ? "Token not accepted — check it was copied fully and hasn't expired."
+        : `Couldn't find ${trial.profile}/timetable.json in ${trial.repo}.`;
+      save.disabled = false;
+    }
+  });
+
+  const card = el("div", { class: "card setup" },
+    el("h2", {}, "Set up this device"),
+    el("p", {}, "Ask Dad for the access token. This only needs doing once."),
+    el("div", { class: "field" }, el("label", {}, "NAME"), profile),
+    el("div", { class: "field" }, el("label", {}, "NOTES REPO"), repo),
+    el("div", { class: "field" }, el("label", {}, "ACCESS TOKEN"), token),
+    save, status
+  );
+  main.append(card);
+}
+
+/* ================= boot ================= */
+async function boot(){
+  $("#dateLine").textContent = fmtHeader(new Date());
+  $("#settingsBtn").addEventListener("click", showSetup);
+  cfg = JSON.parse(localStorage.getItem(LS_CFG) || "null");
+  if (!cfg){ showSetup(); return; }
+  try {
+    await loadTimetable(false);
+    await loadLog();
+    renderMain();
+  } catch (e){
+    if (e instanceof AuthError){
+      $("#settingsBtn").hidden = false;
+      authBanner();
+    } else {
+      banner("err", "Couldn't reach GitHub — check your connection. ",
+        el("button", { onclick: () => location.reload() }, "Retry"));
+      $("#settingsBtn").hidden = false;
     }
   }
-
-  buildStreak(CONFIG, loggedDates);
-  renderApp(CONFIG);
 }
-
-init();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+boot();
 </script>
 </body>
 </html>
